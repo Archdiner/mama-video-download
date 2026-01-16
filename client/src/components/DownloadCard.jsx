@@ -1,7 +1,13 @@
 import React from 'react';
 
-const DownloadCard = ({ result, onDownload }) => {
+const DownloadCard = ({ result, onReset }) => {
     if (!result) return null;
+
+    const formatDuration = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
 
     return (
         <div className="card">
@@ -20,19 +26,21 @@ const DownloadCard = ({ result, onDownload }) => {
                 </div>
 
                 <div className="file-details">
-                    <div className="file-title">{result.originalName}</div>
+                    <div className="file-title">{result.title}</div>
                     <div className="file-meta">
-                        {result.fileSize}
-                        {result.compressed && <span className="tag-compressed">COMPRESSED</span>}
+                        {result.author} • {formatDuration(result.duration)}
+                    </div>
+                    <div className="file-meta">
+                        {result.fileSize} MB • {result.quality}
                     </div>
                 </div>
             </div>
 
             <a
-                href={`http://localhost:3001${result.downloadUrl}`}
+                href={result.downloadUrl}
                 className="primary-btn"
                 style={{ textDecoration: 'none' }}
-                download
+                download={`${result.title}.${result.container}`}
                 target="_blank"
                 rel="noopener noreferrer"
             >
@@ -41,13 +49,14 @@ const DownloadCard = ({ result, onDownload }) => {
 
             <div style={{ marginTop: '1rem', textAlign: 'center' }}>
                 <button
-                    onClick={() => window.location.reload()}
+                    onClick={onReset}
                     style={{
                         background: 'transparent',
                         border: 'none',
                         color: 'var(--text-secondary)',
                         cursor: 'pointer',
-                        textDecoration: 'underline'
+                        textDecoration: 'underline',
+                        fontSize: '0.9rem'
                     }}
                 >
                     Convert another video
