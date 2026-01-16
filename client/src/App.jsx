@@ -6,7 +6,8 @@ import ChaiCup from './components/ChaiCup';
 import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
-const API_Base = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001/api' : '/api');
+// API base URL from environment variable or default to localhost for dev
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function AppContent() {
   const [loading, setLoading] = useState(false);
@@ -19,10 +20,11 @@ function AppContent() {
     setResult(null);
 
     try {
-      console.log('Sending request to:', `${API_Base}/convert`);
-      const response = await axios.post(`${API_Base}/convert`, { url }, {
-        timeout: 35000 // 35 second timeout
-      });
+      console.log('Sending request to:', `${API_BASE}/api/convert`);
+      const response = await axios.post(`${API_BASE}/api/convert`,
+        { url },
+        { timeout: 35000 }
+      );
       console.log('Response:', response.data);
 
       if (!response.data || !response.data.title) {
@@ -33,7 +35,7 @@ function AppContent() {
       setLoading(false);
     } catch (err) {
       console.error('Conversion error:', err);
-      const errorMsg = err.response?.data?.error || err.response?.data?.details || err.message || 'Failed to convert video';
+      const errorMsg = err.response?.data?.detail || err.response?.data?.error || err.message || 'Failed to convert video';
       setError(errorMsg);
       setLoading(false);
     }
