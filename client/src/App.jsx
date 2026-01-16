@@ -3,11 +3,12 @@ import axios from 'axios';
 import UrlInput from './components/UrlInput';
 import DownloadCard from './components/DownloadCard';
 import ChaiCup from './components/ChaiCup';
+import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
 const API_Base = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001/api' : '/api');
 
-function App() {
+function AppContent() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
@@ -18,11 +19,22 @@ function App() {
     setResult(null);
 
     try {
-      const response = await axios.post(`${API_Base}/convert`, { url });
+      console.log('Sending request to:', `${API_Base}/convert`);
+      const response = await axios.post(`${API_Base}/convert`, { url }, {
+        timeout: 35000 // 35 second timeout
+      });
+      console.log('Response:', response.data);
+
+      if (!response.data || !response.data.title) {
+        throw new Error('Invalid response from server');
+      }
+
       setResult(response.data);
       setLoading(false);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to convert video');
+      console.error('Conversion error:', err);
+      const errorMsg = err.response?.data?.error || err.response?.data?.details || err.message || 'Failed to convert video';
+      setError(errorMsg);
       setLoading(false);
     }
   };
@@ -78,6 +90,14 @@ function App() {
         ❤️ dear mama, for any tech support I charge 1 cup of chai
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
   );
 }
 
