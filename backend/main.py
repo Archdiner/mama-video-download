@@ -54,7 +54,7 @@ async def convert_video(request: ConvertRequest):
 
         # PROVEN WORKING CONFIGURATION 2024
         ydl_opts = {
-            'format': 'bestaudio/best',
+            # 'format': 'bestaudio/best', # REMOVED: Causes error if ffmpeg is missing or if specific format not found
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
