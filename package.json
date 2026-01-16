@@ -1,0 +1,8 @@
+{
+    "name": "mama-video-download-api",
+    "version": "1.0.0",
+    "type": "module",
+    "dependencies": {
+        "@distube/ytdl-core": "^4.16.12"
+    }
+}
