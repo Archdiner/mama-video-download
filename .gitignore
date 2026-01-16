@@ -4,3 +4,5 @@ dist
 .env
 downloads/
 !downloads/.gitkeep
+
+__pycache__/
