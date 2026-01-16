@@ -1,8 +1,8 @@
-import ytdl from '@distube/ytdl-core';
+// Using RapidAPI's YouTube MP3 Downloader API
+// This is the proven solution used by all working Vercel deployments
 
-// Set timeout for Vercel serverless function
 export const config = {
-    maxDuration: 30, // 30 seconds max
+    maxDuration: 30,
 };
 
 export default async function handler(req, res) {
@@ -32,53 +32,48 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid YouTube URL' });
     }
 
+    // Get RapidAPI key from environment variable
+    const rapidApiKey = process.env.RAPIDAPI_KEY;
+
+    if (!rapidApiKey) {
+        return res.status(500).json({
+            error: 'API key not configured',
+            details: 'Please add RAPIDAPI_KEY to environment variables in Vercel dashboard'
+        });
+    }
+
     try {
-        // Validate URL with ytdl-core
-        if (!ytdl.validateURL(url)) {
-            return res.status(400).json({ error: 'Invalid YouTube URL' });
-        }
+        console.log('Fetching video info from RapidAPI for:', url);
 
-        console.log('Fetching info for:', url);
+        // Call RapidAPI's YouTube MP3 Downloader
+        const apiUrl = `https://youtube-mp3-downloader2.p.rapidapi.com/ytmp3/ytmp3/custom/?url=${encodeURIComponent(url)}&quality=320`;
 
-        // Get video info with timeout
-        const info = await Promise.race([
-            ytdl.getInfo(url),
-            new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Request timeout - video took too long to process')), 25000)
-            )
-        ]);
-
-        console.log('Got video info:', info.videoDetails.title);
-
-        // Filter for audio-only formats
-        const audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
-
-        if (!audioFormats.length) {
-            return res.status(500).json({ error: 'No audio formats available for this video' });
-        }
-
-        // Get best audio format
-        const bestAudio = audioFormats.reduce((prev, current) => {
-            return (parseInt(current.audioBitrate || 0) > parseInt(prev.audioBitrate || 0)) ? current : prev;
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'X-RapidAPI-Key': rapidApiKey,
+                'X-RapidAPI-Host': 'youtube-mp3-downloader2.p.rapidapi.com'
+            }
         });
 
-        // Calculate file size in MB
-        const fileSizeMB = bestAudio.contentLength
-            ? (parseInt(bestAudio.contentLength) / (1024 * 1024)).toFixed(2)
-            : 'Unknown';
+        if (!response.ok) {
+            throw new Error(`RapidAPI error: ${response.status}`);
+        }
 
-        console.log('Returning success response');
+        const data = await response.json();
 
-        // Return video info and download URL
+        console.log('Got response from RapidAPI');
+
+        // Return standardized response
         res.status(200).json({
             success: true,
-            title: info.videoDetails.title,
-            author: info.videoDetails.author.name,
-            duration: parseInt(info.videoDetails.lengthSeconds),
-            downloadUrl: bestAudio.url,
-            fileSize: fileSizeMB,
-            quality: `${bestAudio.audioBitrate || '128'}kbps`,
-            container: bestAudio.container || 'webm'
+            title: data.title || 'Unknown Title',
+            author: data.author || 'Unknown Author',
+            duration: data.duration || 0,
+            downloadUrl: data.dlink,
+            fileSize: data.fsize || 'Unknown',
+            quality: '320kbps',
+            container: 'mp3'
         });
 
     } catch (error) {
@@ -87,20 +82,8 @@ export default async function handler(req, res) {
         if (error.message.includes('timeout')) {
             return res.status(408).json({
                 error: 'Video processing timeout',
-                details: 'This video is taking too long to process. Try a shorter video or try again later.'
+                details: 'Try a shorter video or try again later.'
             });
-        }
-
-        if (error.message.includes('age')) {
-            return res.status(403).json({ error: 'Age-restricted videos cannot be downloaded' });
-        }
-
-        if (error.message.includes('private')) {
-            return res.status(403).json({ error: 'Private videos cannot be downloaded' });
-        }
-
-        if (error.message.includes('unavailable')) {
-            return res.status(404).json({ error: 'Video is unavailable or has been removed' });
         }
 
         res.status(500).json({

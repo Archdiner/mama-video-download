@@ -2,63 +2,60 @@
 
 A beautiful, mobile-first YouTube to MP3 converter with a cozy chai theme.
 
+## 🎯 Working Solution
+
+This app uses **RapidAPI's YouTube MP3 Downloader API** - the same proven solution used by all successful Vercel YouTube converters.
+
+## ⚙️ Setup Instructions
+
+### 1. Get a Free RapidAPI Key
+
+1. Go to [RapidAPI YouTube MP3 Downloader](https://rapidapi.com/ytjar/api/youtube-mp3-downloader2)
+2. Click "Subscribe to Test"
+3. Choose the **FREE plan** (500 requests/month)
+4. Copy your API key
+
+### 2. Add API Key to Vercel
+
+1. Go to your Vercel project dashboard
+2. Navigate to **Settings → Environment Variables**
+3. Add a new variable:
+   - **Name**: `RAPIDAPI_KEY`
+   - **Value**: `your-api-key-here`
+4. Click **Save**
+5. Redeploy your project
+
+### 3. Local Development
+
+Create a `.env.local` file in the root:
+```
+RAPIDAPI_KEY=your-api-key-here
+```
+
+Then run:
+```bash
+cd client
+npm install
+npm run dev
+```
+
 ## Features
 
-- 🎵 Instant MP3 downloads from YouTube
+- 🎵 High-quality MP3 downloads (320kbps)
 - ☕ Beautiful chai-themed UI
 - 📱 Mobile-first responsive design
-- ⚡ Super fast (no server processing)
+- ⚡ Blazing fast conversion
 - 🎨 Glassmorphism and smooth animations
 
 ## Tech Stack
 
 - **Frontend**: React + Vite
-- **API**: Vercel Serverless Functions
-- **YouTube Extraction**: ytdl-core
+- **API**: Vercel Serverless Functions + RapidAPI
+- **Styling**: Custom CSS with chai aesthetic
 
-## Local Development
+## Deployment
 
-1. Navigate to the client folder:
-   ```bash
-   cd client
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Run development server:
-   ```bash
-   npm run dev
-   ```
-
-4. Open http://localhost:5173
-
-## Deployment to Vercel
-
-1. Push your code to GitHub
-
-2. Import project to Vercel:
-   - Go to https://vercel.com/new
-   - Select your repository
-   - Framework Preset: **Vite**
-   - Root Directory: **client**
-   - Click **Deploy**
-
-That's it! Your app will be live in seconds.
-
-## How It Works
-
-1. User pastes a YouTube URL
-2. Vercel serverless function extracts audio stream info using ytdl-core
-3. Returns direct download link to best quality audio
-4. User downloads instantly (no waiting for server processing!)
-
-## Limitations
-
-- Cannot compress files >25MB (trade-off for speed and Vercel compatibility)
-- Very long videos (>15 min) may timeout on free tier
+Push to GitHub and Vercel will auto-deploy. Don't forget to add the `RAPIDAPI_KEY` environment variable!
 
 ## License
 
