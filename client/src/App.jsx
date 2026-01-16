@@ -6,8 +6,9 @@ import ChaiCup from './components/ChaiCup';
 import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
-// API base URL from environment variable or default to localhost for dev
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// In production (Vercel), API routes are at /api
+// In development, fallback to localhost:8000 if backend is running separately
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : '');
 
 function AppContent() {
   const [loading, setLoading] = useState(false);
@@ -35,7 +36,7 @@ function AppContent() {
       setLoading(false);
     } catch (err) {
       console.error('Conversion error:', err);
-      const errorMsg = err.response?.data?.detail || err.response?.data?.error || err.message || 'Failed to convert video';
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to convert video';
       setError(errorMsg);
       setLoading(false);
     }
