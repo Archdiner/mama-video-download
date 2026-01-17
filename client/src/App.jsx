@@ -24,7 +24,7 @@ function App() {
     setResult(null);
 
     try {
-      const response = await axios.post(`${API_Base}/convert`, { url });
+      const response = await axios.post(`${API_Base}/convert`, { url }, { timeout: 120000 }); // 2 min timeout for cold starts
       setJobId(response.data.jobId);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to start conversion');

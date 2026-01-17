@@ -41,6 +41,11 @@ setInterval(() => {
   });
 }, 3600000); // Run every hour
 
+// Health check endpoint (useful for cold start warmup)
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Routes
 app.use('/api', convertRoutes);
 
