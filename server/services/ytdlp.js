@@ -41,12 +41,20 @@ const startDownload = (url) => {
     const cookiesPath = path.join(__dirname, '../cookies.txt');
     let cookiesArg = '';
     if (process.env.YOUTUBE_COOKIES) {
-        // Write cookies to file if not already done
-        if (!fs.existsSync(cookiesPath)) {
-            fs.writeFileSync(cookiesPath, process.env.YOUTUBE_COOKIES.replace(/\\n/g, '\n'));
-            console.log('Cookies file created from environment variable');
+        try {
+            // Write cookies to file if not already done
+            if (!fs.existsSync(cookiesPath)) {
+                const cookieContent = process.env.YOUTUBE_COOKIES.replace(/\\n/g, '\n');
+                fs.writeFileSync(cookiesPath, cookieContent);
+                console.log('Cookies file created from environment variable');
+                console.log(`Cookie file size: ${cookieContent.length} bytes`);
+            }
+            cookiesArg = `--cookies "${cookiesPath}"`;
+        } catch (err) {
+            console.error('Error writing cookies file:', err);
         }
-        cookiesArg = `--cookies "${cookiesPath}"`;
+    } else {
+        console.log('No YOUTUBE_COOKIES environment variable set');
     }
 
     const command = `${executable} -x --audio-format mp3 --audio-quality 0 --newline --ffmpeg-location "${ffmpegPath}" ${cookiesArg} --no-check-certificates --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -o "${outputTemplate}" "${url}"`;
