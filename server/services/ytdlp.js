@@ -34,7 +34,10 @@ const startDownload = (url) => {
     // Fallback to global command if local doesn't exist (optional, but good for local dev if not running postinstall)
     const executable = fs.existsSync(ytDlpPath) ? ytDlpPath : 'yt-dlp';
 
-    const command = `${executable} -x --audio-format mp3 --audio-quality 0 --newline -o "${outputTemplate}" "${url}"`;
+    // Get ffmpeg path from ffmpeg-static
+    const ffmpegPath = require('ffmpeg-static');
+
+    const command = `${executable} -x --audio-format mp3 --audio-quality 0 --newline --ffmpeg-location "${ffmpegPath}" -o "${outputTemplate}" "${url}"`;
 
     const process = exec(command);
 
@@ -86,7 +89,13 @@ const startDownload = (url) => {
                     }
                 });
             } else {
-                failJob(jobId, 'Output file not found');
+                console.error(`Output file not found: ${filePath}`);
+                // List files in directory for debugging
+                const dir = path.dirname(filePath);
+                fs.readdir(dir, (err, files) => {
+                    if (files) console.error(`Files in ${dir}:`, files);
+                });
+                failJob(jobId, 'Output file not found - conversion likely failed');
             }
         } else {
             failJob(jobId, `yt-dlp exited with code ${code}`);

@@ -5,3 +5,4 @@ dist
 downloads/
 !downloads/.gitkeep
 server/bin/
+server/scripts/
