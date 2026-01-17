@@ -6,7 +6,7 @@ import DownloadCard from './components/DownloadCard';
 import ChaiCup from './components/ChaiCup';
 import './App.css';
 
-const API_Base = 'http://localhost:3001/api';
+const API_Base = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 function App() {
   const [loading, setLoading] = useState(false);

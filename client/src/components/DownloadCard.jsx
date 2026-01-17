@@ -29,7 +29,7 @@ const DownloadCard = ({ result, onDownload }) => {
             </div>
 
             <a
-                href={`http://localhost:3001${result.downloadUrl}`}
+                href={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${result.downloadUrl}`}
                 className="primary-btn"
                 style={{ textDecoration: 'none' }}
                 download

@@ -8,7 +8,9 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+// Middleware
+app.use(cors()); // Allow all origins by default for now
+// To restrict to frontend: app.use(cors({ origin: process.env.FRONTEND_URL }));
 app.use(express.json());
 
 // Create downloads directory if it doesn't exist
@@ -16,6 +18,28 @@ const downloadsDir = path.join(__dirname, 'downloads');
 if (!fs.existsSync(downloadsDir)) {
   fs.mkdirSync(downloadsDir);
 }
+
+// Cleanup old files (older than 1 hour) every 1 hour
+setInterval(() => {
+  fs.readdir(downloadsDir, (err, files) => {
+    if (err) return console.error('Cleanup error:', err);
+
+    files.forEach(file => {
+      const filePath = path.join(downloadsDir, file);
+      fs.stat(filePath, (err, stats) => {
+        if (err) return;
+
+        const now = Date.now();
+        const endTime = new Date(stats.ctime).getTime() + 3600000; // 1 hour
+        if (now > endTime) {
+          fs.unlink(filePath, (err) => {
+            if (err) console.error('Error deleting file:', filePath);
+          });
+        }
+      });
+    });
+  });
+}, 3600000); // Run every hour
 
 // Routes
 app.use('/api', convertRoutes);
