@@ -39,9 +39,14 @@ const startDownload = (url) => {
 
     const command = `${executable} -x --audio-format mp3 --audio-quality 0 --newline --ffmpeg-location "${ffmpegPath}" -o "${outputTemplate}" "${url}"`;
 
+    console.log(`Executing: ${command}`); // Log command for debug
+
     const process = exec(command);
 
+    let logs = [];
+
     process.stdout.on('data', (data) => {
+        logs.push(data);
         const lines = data.split('\n');
         lines.forEach(line => {
             if (line.includes('[download]')) {
@@ -59,8 +64,8 @@ const startDownload = (url) => {
     });
 
     process.stderr.on('data', (data) => {
+        logs.push(`STDERR: ${data}`);
         console.error(`yt-dlp stderr: ${data}`);
-        // yt-dlp writes some progress to stderr or info
     });
 
     process.on('close', (code) => {
@@ -90,14 +95,22 @@ const startDownload = (url) => {
                 });
             } else {
                 console.error(`Output file not found: ${filePath}`);
+                console.error('--- LOGS START ---');
+                console.error(logs.join(''));
+                console.error('--- LOGS END ---');
+
                 // List files in directory for debugging
                 const dir = path.dirname(filePath);
                 fs.readdir(dir, (err, files) => {
                     if (files) console.error(`Files in ${dir}:`, files);
                 });
-                failJob(jobId, 'Output file not found - conversion likely failed');
+                failJob(jobId, 'Output file not found - conversion likely failed. Check server logs.');
             }
         } else {
+            console.error(`yt-dlp failed with code ${code}`);
+            console.error('--- LOGS START ---');
+            console.error(logs.join(''));
+            console.error('--- LOGS END ---');
             failJob(jobId, `yt-dlp exited with code ${code}`);
         }
     });
