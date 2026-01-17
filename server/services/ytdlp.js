@@ -37,7 +37,19 @@ const startDownload = (url) => {
     // Get ffmpeg path from ffmpeg-static
     const ffmpegPath = require('ffmpeg-static');
 
-    const command = `${executable} -x --audio-format mp3 --audio-quality 0 --newline --ffmpeg-location "${ffmpegPath}" --no-check-certificates --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" --extractor-args "youtube:player_client=web" -o "${outputTemplate}" "${url}"`;
+    // Handle cookies from environment variable
+    const cookiesPath = path.join(__dirname, '../cookies.txt');
+    let cookiesArg = '';
+    if (process.env.YOUTUBE_COOKIES) {
+        // Write cookies to file if not already done
+        if (!fs.existsSync(cookiesPath)) {
+            fs.writeFileSync(cookiesPath, process.env.YOUTUBE_COOKIES.replace(/\\n/g, '\n'));
+            console.log('Cookies file created from environment variable');
+        }
+        cookiesArg = `--cookies "${cookiesPath}"`;
+    }
+
+    const command = `${executable} -x --audio-format mp3 --audio-quality 0 --newline --ffmpeg-location "${ffmpegPath}" ${cookiesArg} --no-check-certificates --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -o "${outputTemplate}" "${url}"`;
 
     console.log(`Executing: ${command}`); // Log command for debug
 
