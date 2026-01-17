@@ -37,7 +37,7 @@ const startDownload = (url) => {
     // Get ffmpeg path from ffmpeg-static
     const ffmpegPath = require('ffmpeg-static');
 
-    const command = `${executable} -x --audio-format mp3 --audio-quality 0 --newline --ffmpeg-location "${ffmpegPath}" -o "${outputTemplate}" "${url}"`;
+    const command = `${executable} -x --audio-format mp3 --audio-quality 0 --newline --ffmpeg-location "${ffmpegPath}" --no-check-certificates --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" --extractor-args "youtube:player_client=web" -o "${outputTemplate}" "${url}"`;
 
     console.log(`Executing: ${command}`); // Log command for debug
 
