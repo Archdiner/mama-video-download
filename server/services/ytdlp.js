@@ -30,7 +30,11 @@ const startDownload = (url) => {
     // We'll use that for simplicity, but we might check size later.
 
     // Note: To get progress, we can use the --newline flag and parse output
-    const command = `yt-dlp -x --audio-format mp3 --audio-quality 0 --newline -o "${outputTemplate}" "${url}"`;
+    const ytDlpPath = path.join(__dirname, '../bin/yt-dlp');
+    // Fallback to global command if local doesn't exist (optional, but good for local dev if not running postinstall)
+    const executable = fs.existsSync(ytDlpPath) ? ytDlpPath : 'yt-dlp';
+
+    const command = `${executable} -x --audio-format mp3 --audio-quality 0 --newline -o "${outputTemplate}" "${url}"`;
 
     const process = exec(command);
 
